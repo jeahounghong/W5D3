@@ -27,9 +27,13 @@ class User
     
     def create
         raise "#{self} already in database" if @id 
-        QuestionsDataBase.instance.execute(<<-SQL)
-
+        QuestionsDataBase.instance.execute(<<-SQL, :fname, :lname)
+            INSERT INTO
+                users (fname, lname)
+            VALUES
+                (?,?)
         SQL
+        @id = QuestionsDataBase.instance.last_insert_row_id
     end
 
     def self.find_by_id(id)
@@ -70,7 +74,19 @@ class Question
     end
 
     def self.find_by_author_id(author_id)
-
+        question = QuestionsDatabase.instance.execute(<<-SQL, author_id)
+        SELECT
+            *
+        FROM
+            questions
+        JOIN users
+            ON questions.author_id = users.id
+        WHERE
+            questions.author_id = ?
+        SQL
+    
+        return nil unless question.length > 0
+        Question.new(question.first)
     end
 
     def initialize(options)
