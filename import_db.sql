@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS questions_follows;
+DROP TABLE IF EXISTS question_follows;
 DROP TABLE IF EXISTS question_likes;
 DROP TABLE IF EXISTS replies;
 DROP TABLE IF EXISTS questions;
@@ -56,7 +56,9 @@ INSERT INTO
 VALUES
     ('Calvin','Koo'),
     ('David','Hong'),
-    ('Ben','Simmons');
+    ('Ben','Simmons'),
+    ('John','Doe'),
+    ('Gabbie','Kim');
 
 --seeding questions
 INSERT INTO
@@ -70,7 +72,10 @@ VALUES
 INSERT INTO
     question_follows (user_id, question_id)
 VALUES
-    ((SELECT id from users WHERE fname = 'Calvin'), (SELECT id from questions WHERE title = 'Questions 1' ));
+    ((SELECT id from users WHERE fname = 'Calvin'), (SELECT id from questions WHERE title = 'Questions 1' )),
+    ((SELECT id from users WHERE fname = 'Calvin'), (SELECT id from questions WHERE title = 'Questions 2' )),
+    ((SELECT id from users WHERE fname = 'Ben'), (SELECT id from questions WHERE title = 'Questions 1' )),
+    ((SELECT id from users WHERE fname = 'Gabbie'), (SELECT id from questions WHERE title = 'Questions 2' ));
 
 
 --seeding replies

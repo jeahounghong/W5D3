@@ -48,6 +48,14 @@ class User
         return nil if data.length == 0
         return User.new(data[0])
     end
+
+    def authored_questions
+        return Questions.find_by_author_id(@id)
+    end
+
+    def authored_replies
+        return Reply.find_by_author_id(@id)
+    end
 end
 
 class Question
@@ -123,9 +131,38 @@ class QuestionFollow
         SQL
         
         return nil unless question_follow.length > 0
-
         QuestionFollow.new(question_follow.first)
     end
+
+    def self.followers_for_question_id(id)
+        followers = QuestionsDatabase.instance.execute(<<-SQL, id)
+            SELECT
+                user_id
+            FROM
+                question_follows
+            WHERE
+                question_id = ?
+        SQL
+        answer = [] 
+        followers.each {|follower| answer << User.find_by_id(follower['user_id'])}
+        return answer
+    end
+
+    def self.followed_questions_for_user_id(id)
+        questions = QuestionsDatabase.instance.execute(<<-SQL, id)
+            SELECT
+                question_id
+            FROM
+                question_follows
+            WHERE
+                user_id = ?
+        SQL
+        answer = [] 
+        questions.each {|question| answer << Question.find_by_id(question['question_id'])}
+        return answer
+    end
+    
+
 end
 
 class Reply
@@ -158,6 +195,34 @@ class Reply
 
         Reply.new(reply.first)
     end
+
+    def self.find_by_author_id(author_id)
+        reply = QuestionsDatabase.instance.execute(<<-SQL, author_id)
+        SELECT
+            *
+        FROM
+            replies
+        WHERE
+            replies.user = ?
+        SQL
+    
+        return nil unless reply.length > 0
+        return reply.map {|el| Reply.new(el)}
+    end
+
+    def self.find_by_question_id(question_id)
+        reply = QuestionsDatabase.instance.execute(<<-SQL, question_id)
+        SELECT
+            *
+        FROM replies
+        WHERE
+            replies.question_id = ?
+        SQL
+    
+        return nil unless reply.length > 0
+        return reply.map {|el| Reply.new(el)}
+    end
+
 end
 
 class QuestionLike
